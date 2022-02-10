@@ -25,7 +25,7 @@ def simple_plot(net, respect_switches=False, line_width=1.0, bus_size=1.0, ext_g
                 trafo_size=1.0, plot_loads=False, plot_gens=False, plot_sgens=False, load_size=1.0, gen_size=1.0, sgen_size=1.0,
                 switch_size=2.0, switch_distance=1.0, plot_line_switches=False, scale_size=True,
                 bus_color="b", line_color='grey', trafo_color='k', ext_grid_color='y',
-                switch_color='k', library="igraph", show_plot=True, ax=None):
+                switch_color='k', library="igraph", highlight_elm=None, highlight_idx=None, show_plot=True, ax=None):
     """
         Plots a pandapower network as simple as possible. If no geodata is available, artificial
         geodata is generated. For advanced plotting see the tutorial
@@ -82,6 +82,10 @@ def simple_plot(net, respect_switches=False, line_width=1.0, bus_size=1.0, ext_g
 
             **library** (String, "igraph") - library name to create generic coordinates (case of
                                                 missing geodata). "igraph" to use igraph package or "networkx" to use networkx package.
+
+            **highlight_elm** (String, None) - component type of which the elements given highlight_idx will appear red
+
+            **highlight_idx** (iterable, None) - indices of the elements of the type given in highlight_elm that will appear red
 
             **show_plot** (bool, True) - Shows plot at the end of plotting
 
@@ -174,16 +178,34 @@ def simple_plot(net, respect_switches=False, line_width=1.0, bus_size=1.0, ext_g
         bsc = create_bus_bus_switch_collection(net, size=switch_size)
         collections.append(bsc)
 
+    if highlight_elm is not None and len(net[highlight_elm]):
+        if highlight_elm + "_size" in locals().keys():
+            size = locals()[highlight_elm + "_size"]
+        else:
+            size = None
+        highlight = create_highlights(net, highlight_elm, highlight_idx, size=size)
+        collections.append(highlight)
+
     ax = draw_collections(collections, ax=ax)
     if show_plot:
         plt.show()
     return ax
 
+def create_highlights(net, elm, idx, color='r', zorder=100, size=None):
+    """
+    Create a collection for selected elements of one type. Elements will appear red and in the foreground.
+    """
+    from pandapower.plotting.collections import create_bus_collection, create_line_collection, \
+        create_trafo_collection, create_trafo3w_collection, create_ext_grid_collection, create_sgen_collection, \
+        create_gen_collection, create_load_collection
+    # TODO: add kwargs for size / width
+    return locals()['create_%s_collection' %elm](net, idx, color=color, zorder=zorder, size=size)
 
 if __name__ == "__main__":
     import pandapower.networks as nw
 
     net = nw.case145()
+
     #    net = nw.create_cigre_network_mv()
     #    net = nw.mv_oberrhein()
-    simple_plot(net, bus_size=0.4)
+    simple_plot(net, bus_size=0.4, highlight_elm='bus', highlight_idx=[1, 2])
