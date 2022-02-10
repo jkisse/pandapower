@@ -1,7 +1,8 @@
 Change Log
 
-[CHANGED] rename u by vm (voltage magnitude) in file and functions names
-[ADDED] added support for Python 3.10
+- [CHANGED] rename u by vm (voltage magnitude) in file and functions names
+- [ADDED] added support for Python 3.10
+- [ADDED] highlight functionality for simple_plot
 
 [2.8.0]- 2022-02-06
 ----------------------
